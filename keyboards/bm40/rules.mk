@@ -1,0 +1,1 @@
+DEFAULT_FOLDER = as/bm40/rev2
