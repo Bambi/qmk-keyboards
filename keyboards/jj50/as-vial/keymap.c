@@ -43,11 +43,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * `-----------------------------------------------------------------------------------'
      */
     [_QWERTY] = LAYOUT(
-        KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
+        QK_GESC, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
         KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_QUOT,
-        KC_ESC,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
+        KC_GRAVE,KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
         KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RALT,
-        LOWER,   KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_SPC,  KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT
+        LOWER,   KC_LCTL, SC_LAPO, KC_LGUI, LOWER,   KC_SPC,  KC_SPC,  RAISE,   SC_RAPC, KC_DOWN, KC_UP,   KC_RGHT
     ),
 
     /* Lower
@@ -113,3 +113,78 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______, _______, _______, BL_TOGG, BL_DOWN, BL_UP,   BL_BRTG
     )
 };
+
+#ifdef RGBLIGHT_LAYERS
+// Leds are indexed from left to right
+// Light LEDs 1 & 2 red when caps lock is active.
+const rgblight_segment_t PROGMEM my_capslock_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 2, HSV_RED}       // Light 4 LEDs, starting with LED 6
+);
+// Light LEDs 9 & 10 in cyan when keyboard layer 1 is active
+const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 2, HSV_BLUE}
+);
+// Light LEDs 11 & 12 in purple when keyboard layer 2 is active
+const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 2, HSV_GREEN}
+);
+// Light LEDs 13 & 14 in green when keyboard layer 3 is active
+const rgblight_segment_t PROGMEM my_layer3_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 2, HSV_PURPLE}
+);
+
+#ifdef RGBLIGHT_LAYER_BLINK
+// layer blink when auto shift state change
+const rgblight_segment_t PROGMEM my_caps_word_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {1, 2, HSV_ORANGE}
+);
+void post_process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case QK_AUTO_SHIFT_TOGGLE:
+            rgblight_blink_layer(4, 500);
+            break;
+    }
+}
+#endif
+
+// Now define the array of layers. Later layers take precedence
+const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+    my_capslock_layer,
+    my_layer1_layer,    // Overrides caps lock layer
+    my_layer2_layer,    // Overrides other layers
+    my_layer3_layer     // Overrides other layers
+    #ifdef RGBLIGHT_LAYER_BLINK
+    ,my_caps_word_layer
+    #endif
+);
+
+// called after firmware init
+void keyboard_post_init_user(void) {
+    // Enable the LED layers
+    rgblight_layers = my_rgb_layers;
+    // disable auto-shift
+    autoshift_disable();
+}
+
+// called when led_state (num lock, caps lock, scroll lock, ...) is changed
+bool led_update_user(led_t led_state) {
+    rgblight_set_layer_state(0, led_state.caps_lock);
+    return true;
+}
+
+// called when layer state change
+layer_state_t layer_state_set_user(layer_state_t state) {
+    rgblight_set_layer_state(1, layer_state_cmp(state, _LOWER));
+    rgblight_set_layer_state(2, layer_state_cmp(state, _RAISE));
+    rgblight_set_layer_state(3, layer_state_cmp(state, _ADJUST));
+    return state;
+}
+
+#ifdef CAPS_WORD_ENABLE
+// called when caps word state change
+void caps_word_set_user(bool active) {
+    rgblight_set_layer_state(0, active);
+}
+#endif
+
+#endif
