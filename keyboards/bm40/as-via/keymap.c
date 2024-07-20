@@ -23,9 +23,6 @@ void keyboard_post_init_user(void) {
 }
 
 void rgb_matrix_set_hsv_range(uint8_t start, uint8_t nb, uint8_t hue, uint8_t sat, uint8_t val) {
-    if (val > rgb_matrix_get_val()) {
-        val = rgb_matrix_get_val();
-    }
     HSV hsv = {hue, sat, val};
     RGB rgb = hsv_to_rgb(hsv);
     while (nb) {
@@ -36,6 +33,9 @@ void rgb_matrix_set_hsv_range(uint8_t start, uint8_t nb, uint8_t hue, uint8_t sa
 }
 
 void set_indicator(uint8_t hue, uint8_t sat, uint8_t val) {
+    if (val > rgb_matrix_get_val()) {
+        val = rgb_matrix_get_val();
+    }
     rgb_matrix_set_color_all(RGB_OFF); // rest of keys
     rgb_matrix_set_hsv_range(28, 4, hue, sat, val);
     rgb_matrix_set_hsv_range(40, 3, hue, sat, val);
