@@ -33,4 +33,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGBLIGHT_DEFAULT_VAL RGBLIGHT_LIMIT_VAL
 // Space Cadet
 #define LAPO_KEYS KC_LALT, KC_LSFT, KC_LBRC
-#define RAPC_KEYS KC_LALT, KC_LSFT, KC_RBRC
+#define RAPC_KEYS KC_RALT, KC_LSFT, KC_RBRC

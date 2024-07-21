@@ -17,6 +17,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "./json-keymap.c"
 
+enum layers {
+    _QWERTY,
+    _LOWER,
+    _RAISE,
+    _ADJUST
+};
+
 #ifdef RGBLIGHT_LAYERS
 // Leds are indexed from left to right
 // Light LEDs 1 & 2 red when caps lock is active.
