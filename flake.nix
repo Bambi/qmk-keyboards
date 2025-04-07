@@ -10,7 +10,7 @@
       perSystem = { config, pkgs, ... }: {
         devShells.default = pkgs.mkShell {
           name = "qmk";
-          buildInputs = with pkgs; [
+          packages = with pkgs; [
             just
             qmk
             stow
